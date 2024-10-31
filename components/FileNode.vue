@@ -60,9 +60,9 @@ const isSelected = computed(() => {
   const selectedTrimmed = props.selectedFile.trim()
   const pathTrimmed = props.file.path.trim()
   const isSelected = selectedTrimmed === pathTrimmed
-  console.log("Selected file:", selectedTrimmed)
-  console.log("Current file path:", pathTrimmed)
-  console.log("Is selected:", isSelected)
+  // console.log("Selected file:", selectedTrimmed)
+  // console.log("Current file path:", pathTrimmed)
+  // console.log("Is selected:", isSelected)
   return isSelected
 })
 
