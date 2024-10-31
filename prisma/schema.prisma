@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Websites {
+  id        Int       @id @default(autoincrement())
+  title     String 
+  description String
+  repo_name   String
+  image       String
+  category    String
+  status      String
+  created_at  DateTime?   @default(now()) @db.Timestamptz(6)   
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+// Define the User model if not already defined
+model User {
+  id        Int        @id @default(autoincrement())
+  loggedInId  String    @unique
+  websites  Websites[] // This establishes a one-to-many relationship
+}
