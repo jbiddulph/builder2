@@ -8,7 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "node server.js"
+    "start": "nuxt generate"
   },
   "dependencies": {
     "@nuxt/icon": "^1.6.1",
