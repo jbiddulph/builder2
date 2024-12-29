@@ -9,7 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "heroku-postbuild": "npm run build",
-    "start": "npm run serve"
+    "start": "npm run dev"
   },
   "dependencies": {
     "@nuxt/icon": "^1.6.1",
