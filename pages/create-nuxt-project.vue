@@ -111,7 +111,6 @@ const projectData = ref({
 })
 const logout = async () => {
   await authStore.logout()
-  console.log("User is now signed out")
 }
 const createProject = async () => {
   // Send the selected modules to the backend

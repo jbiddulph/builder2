@@ -1,6 +1,5 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const user = useSupabaseUser()
-  console.log("userx: ", user.value)
 
   // If the user is not logged in, redirect to the home page, but only if they're not already there
   if (!user.value && to.path !== '/') {

@@ -96,7 +96,6 @@ const handleLogin = async () => {
   if (error) {
     console.error('Login Error:', error.message)
   } else {
-    console.log('User logged in with ID:', authStore.userID)
     localStorage.setItem('accessToken', authStore.accessToken)
     router.push("/create-nuxt-project")
   }
@@ -107,7 +106,6 @@ const handleRegister = async () => {
   if (error) {
     console.error('Registration Error:', error.message)
   } else {
-    console.log('User registered with ID:', authStore.userID)
     localStorage.setItem('accessToken', authStore.accessToken)
     router.push("/create-nuxt-project")
   }

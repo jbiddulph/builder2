@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const { data: user, error } = await supabase.auth.getUser(token)
-  console.log("USERR ID: ", user.user.id)
   if (error || !user) {
     console.error("Error fetching user from Supabase:", error)
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" })
