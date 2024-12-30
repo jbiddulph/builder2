@@ -2,7 +2,7 @@ import { defineEventHandler, readBody } from "h3";
 import { execSync } from "child_process";
 import axios from "axios";
 import * as path from "path";
-const config = useRuntimeConfig()
+const config = useRuntimeConfig();
 const GITHUB_TOKEN = config.githubToken;
 const NETLIFY_TOKEN = config.netlifyToken;
 const GITHUB_USERNAME = config.githubUser;
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
     const repoResponse = await axios.post(
       `https://api.github.com/user/repos`,
       { name: projectName, private: true },
-      { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
+      { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
     );
 
     const githubRepoUrl = repoResponse.data.clone_url;
@@ -61,18 +61,18 @@ export default defineEventHandler(async (event) => {
           provider: "github",
           repo: `${GITHUB_USERNAME}/${projectName}`,
           branch: "master",
-          private: true,
-        },
+          private: true
+        }
       },
       {
         headers: {
-          Authorization: `Bearer ${NETLIFY_TOKEN}`,
+          Authorization: `Bearer ${process.env.NETLIFY_TOKEN}`,
           "Content-Type": "application/json",
         },
       }
     );
 
-    const siteId = netlifyResponse.data.id; // Get the site ID from the Netlify response
+    const siteId = netlifyResponse.data.id;
     console.log("Netlify site ID:", siteId);
 
     // Step 7: Create a deploy hook for the Netlify site
@@ -89,8 +89,16 @@ export default defineEventHandler(async (event) => {
     console.log("Deployment to Netlify successful:", netlifyResponse.data.url);
     return { netlify_url: netlifyResponse.data.url };
   } catch (error) {
-    console.error("Error creating and deploying project:", error.message, error);
-    return { statusCode: 500, message: "Failed to create and deploy project." };
+    console.error("Error creating and deploying project:", error.message, error.stack);
+
+    // Log full error details for better diagnosis
+    if (error.response) {
+      console.error("Error response status:", error.response.status);
+      console.error("Error response headers:", error.response.headers);
+      console.error("Error response data:", error.response.data);
+    }
+
+    return { statusCode: 500, message: "Failed to create and deploy project.", error: error.message };
   }
 
   async function createDeployHook(siteId) {
@@ -106,7 +114,7 @@ export default defineEventHandler(async (event) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${NETLIFY_TOKEN}`,
+            Authorization: `Bearer ${process.env.NETLIFY_TOKEN}`,
             "Content-Type": "application/json",
           },
         }

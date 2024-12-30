@@ -40,8 +40,11 @@
           </ul>
         </div>
 
-        <div class="w-4/5 bg-red-100 text-red-500 italic">
-          <h2 class="text-center underline">You should know what you are doing</h2>
+        <div class="w-4/5 bg-red-100">
+          <div class="w-full justify-between flex">
+            <h2 class="text-red-700">Selected file: <span class="font-bold">{{ selectedFile }}</span></h2>
+            <h3 class="text-center underline mr-4 text-red-300 italic">{{ fileMsg }}</h3>
+          </div>
           <!-- Monaco Editor with v-model binding to editableText -->
           <MonacoEditor v-model="editableText" lang="js" class="editor" />
           
@@ -67,6 +70,7 @@ const website = ref({})
 const repoFiles = ref([]) // Array to hold the file structure
 const editableText = ref("Select a file to view its content") // Monaco editor content
 const selectedFile = ref("") // Currently selected file path
+const fileMsg = ref("You should know what you are doing...") // Message to display file status
 const config = useRuntimeConfig()
 const GITHUB_TOKEN = config.public.githubToken
 const owner = config.public.githubUser

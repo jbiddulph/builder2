@@ -119,6 +119,7 @@ const createProject = async () => {
     body: { modules: selectedModules.value },
   })
   .then((response) => {
+    console.log("Project created:", response);
     // Display the result, such as the Netlify deploy link
     alert(`Project created! View at: ${response.netlify_url}`);
     projectData.value.repo_name = response.netlify_url
