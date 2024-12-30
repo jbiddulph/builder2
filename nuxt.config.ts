@@ -4,6 +4,9 @@ export default defineNuxtConfig({
   target: 'server', // or 'static' for static sites
   ssr: true, // ensures the app is rendered server-side
   devtools: { enabled: false },
+  server: {
+    port: process.env.PORT || 3000, // Default port is 3000
+  },
   runtimeConfig: {
     public: {
       githubToken: process.env.GITHUB_TOKEN,
