@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
-  target: 'server', // or 'static' for static sites
+  target: 'static', // or 'static' for static sites
   ssr: true, // ensures the app is rendered server-side
   devtools: { enabled: false },
   server: {
