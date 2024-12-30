@@ -1,1 +1,1 @@
-web: npm run start
+web: npx serve -s .output/public
