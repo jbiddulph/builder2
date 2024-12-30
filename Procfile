@@ -1,1 +1,1 @@
-web: npm run generate && npx serve -s .output/public
+web: npx serve -s .output/public
