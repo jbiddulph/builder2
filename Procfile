@@ -1,1 +1,1 @@
-web: npx serve -s .output/public
+web: npx serve -s dist
