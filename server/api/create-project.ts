@@ -53,14 +53,23 @@ export default defineEventHandler(async (event) => {
 
     // Step 5: Set remote to HTTPS and push code to GitHub
     const githubRepoUrl = `https://github.com/${process.env.GITHUB_USER}/${projectName}.git`;
+    const sshGitHubRepoUrl = `git@github.com:${process.env.GITHUB_USER}/${projectName}.git`;
     console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
-
+    try {
+        // Add the remote
+        execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
+    
+        // Push the code
+        execSync("git push -u origin master", { cwd: projectDir });
+    } catch (error) {
+        console.error("Error setting remote or pushing code:", error.message);
+    }
     // Add the remote
-    execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+    //execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
 
 
     // Push the code
-    execSync("git push -u origin master", { cwd: projectDir });
+    //execSync("git push -u origin master", { cwd: projectDir });
     console.log("Code pushed to GitHub successfully on master branch.");
 
     // Step 6: Use Netlify API to create and link the site
