@@ -56,7 +56,8 @@ export default defineEventHandler(async (event) => {
     console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
 
     // Add the remote
-    execSync(`git remote add ${githubRepoUrl}`, { cwd: projectDir });
+    execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+
 
     // Push the code
     execSync("git push -u origin master", { cwd: projectDir });
