@@ -43,24 +43,22 @@ export default defineEventHandler(async (event) => {
 
     // Step 4: Create GitHub repo and get SSH URL
     console.log("Creating GitHub repository...");
-    const repoResponse = await axios.post(
-      `https://api.github.com/user/repos`,
-      { name: projectName, private: true },
-      { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
-    );
+    // const repoResponse = await axios.post(
+    //   `https://api.github.com/user/repos`,
+    //   { name: projectName, private: true },
+    //   { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
+    // );
 
-    const sshGitHubRepoUrl = `git@github.com:${process.env.GITHUB_USER}/${projectName}.git`;
-    console.log("Using GitHub URL:", sshGitHubRepoUrl);  // Check the URL
+    const GitHubRepoUrl = `https://github.com/${process.env.GITHUB_USER}/${projectName}.git`;
+    console.log("Using GitHub URL:", GitHubRepoUrl);  // Check the URL
 
     // Step 5: Add GitHub SSH key to known_hosts and push code
     try {
       // Add GitHub's SSH key to known_hosts
       console.log("Adding GitHub to known_hosts...");
-      execSync("mkdir -p ~/.ssh", { cwd: projectDir });
-      execSync("ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts", { cwd: projectDir });
       
       // Add the remote
-      execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
+      execSync(`git remote add origin ${GitHubRepoUrl}`, { cwd: projectDir });
 
       // Push the code
       console.log("Pushing code to GitHub...");
