@@ -48,14 +48,12 @@ export default defineEventHandler(async (event) => {
       { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
     );
 
-    // const githubRepoUrl = repoResponse.data.clone_url;
-    // console.log("GitHub repository created:", githubRepoUrl);
-
     // Step 5: Set remote to HTTPS and push code to GitHub
     const githubRepoUrl = `https://${GITHUB_USERNAME}:${process.env.GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/${projectName}.git`;
     execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
     execSync("git push -u origin master", { cwd: projectDir });
     console.log("Code pushed to GitHub successfully on master branch.");
+
 
     // Step 6: Use Netlify API to create and link the site
     console.log("Linking GitHub repository to Netlify...");
