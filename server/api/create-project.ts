@@ -13,6 +13,8 @@ export default defineEventHandler(async (event) => {
   const projectDir = path.join("/tmp", projectName);
 
   try {
+    const gitVersion = execSync('git --version').toString();
+    console.log('Git is available:', gitVersion);
     // Step 1: Create new Nuxt app
     console.log("Creating a new Nuxt application...");
     execSync(`npx nuxi@latest init ${projectDir}`);
@@ -91,6 +93,7 @@ export default defineEventHandler(async (event) => {
     console.log("Deployment to Netlify successful:", netlifyResponse.data.url);
     return { netlify_url: netlifyResponse.data.url };
   } catch (error) {
+    console.error('Git is not available:', error.message);
     console.error("Error creating and deploying project:", error.message, error.stack);
 
     // Log full error details for better diagnosis
