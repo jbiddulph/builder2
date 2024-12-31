@@ -31,8 +31,8 @@ export default defineEventHandler(async (event) => {
 
     // Step 3: Initialize Git repository
     console.log("Initializing Git repository...");
-    execSync(`git config user.name ${process.env.GITHUB_NAME}`, { cwd: projectDir });
-    execSync(`git config user.email ${process.env.GITHUB_EMAIL}`, { cwd: projectDir });
+    // execSync(`git config user.name ${process.env.GITHUB_NAME}`, { cwd: projectDir });
+    // execSync(`git config user.email ${process.env.GITHUB_EMAIL}`, { cwd: projectDir });
     execSync("git init", { cwd: projectDir });
     execSync("git checkout -b master", { cwd: projectDir });
     execSync("git add .", { cwd: projectDir });
