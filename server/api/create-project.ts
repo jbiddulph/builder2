@@ -56,11 +56,14 @@ export default defineEventHandler(async (event) => {
     const sshGitHubRepoUrl = `git@github.com:${process.env.GITHUB_USER}/${projectName}.git`;
     console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
     try {
-        // Add the remote
-        execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
-    
-        // Push the code
-        execSync("git push -u origin master", { cwd: projectDir });
+        // Add GitHub's SSH host key to known_hosts
+    execSync("ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts");
+
+    // Add the GitHub SSH URL as the remote
+    execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
+
+    // Push the code
+    execSync("git push -u origin master", { cwd: projectDir });
     } catch (error) {
         console.error("Error setting remote or pushing code:", error.message);
     }
