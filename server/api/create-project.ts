@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     execSync(`git branch -M main`, { cwd: projectDir });
     console.log("Git repository initialized and initial commit made.");
 
-    // Step 4: Create GitHub repo and get HTTPS URL
+    // Step 4: Create GitHub repo and get SSH URL
     console.log("Creating GitHub repository...");
     const repoResponse = await axios.post(
       `https://api.github.com/user/repos`,
@@ -49,21 +49,25 @@ export default defineEventHandler(async (event) => {
       { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
     );
 
-    // const githubRepoUrl = repoResponse.data.clone_url;
-    // console.log("GitHub repository created:", githubRepoUrl);
-
-    // Step 5: Set remote to HTTPS and push code to GitHub
-    const githubRepoUrl = `https://github.com/${process.env.GITHUB_USER}/${projectName}.git`;
     const sshGitHubRepoUrl = `git@github.com:${process.env.GITHUB_USER}/${projectName}.git`;
-    console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
+    console.log("Using GitHub URL:", sshGitHubRepoUrl);  // Check the URL
+
+    // Step 5: Add GitHub SSH key to known_hosts and push code
     try {
-        // Add the remote
-        execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
-    
-        // Push the code
-        execSync("git push -u origin main", { cwd: projectDir });
-    } catch (error) {
-        console.error("Error setting remote or pushing code:", error.message);
+      // Add GitHub's SSH key to known_hosts
+      console.log("Adding GitHub to known_hosts...");
+      execSync("mkdir -p ~/.ssh", { cwd: projectDir });
+      execSync("ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts", { cwd: projectDir });
+      
+      // Add the remote
+      execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
+
+      // Push the code
+      console.log("Pushing code to GitHub...");
+      execSync("git push -u origin main", { cwd: projectDir });
+      console.log("Code pushed successfully.");
+    } catch (pushError) {
+      console.error("Error setting remote or pushing code:", pushError.message);
     }
     // Add the remote
     //execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
