@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody } from "h3";
 import { execSync } from "child_process";
 import axios from "axios";
+import fs from "fs";
 import * as path from "path";
 const config = useRuntimeConfig();
 const GITHUB_TOKEN = config.githubToken;
@@ -52,10 +53,9 @@ export default defineEventHandler(async (event) => {
 
     // Step 5: Set remote to HTTPS and push code to GitHub
     // execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
-    execSync(`git remote add origin git@github.com:${GITHUB_USERNAME}/${projectName}.git`, { cwd: projectDir });
-    const sshRepoUrl = `git@github.com:${GITHUB_USERNAME}/${projectName}.git`;
-    execSync("ssh-agent bash -c 'ssh-add <(echo $GITHUB_PRIVATE_KEY); git remote set-url " + sshRepoUrl + "'", { cwd: projectDir });
-    execSync("git push -u origin master", { cwd: projectDir });
+    const sshKeyPath = path.join("/tmp", "id_rsa"); // Temporary file path for SSH key
+fs.writeFileSync(sshKeyPath, process.env.GITHUB_PRIVATE_KEY + "\n", { mode: 0o600 }); // Write SSH key
+execSync("ssh-agent bash -c 'ssh-add " + sshKeyPath + "; git remote add origin git@github.com:" + GITHUB_USERNAME + "/" + projectName + ".git; git push -u origin master'", { cwd: projectDir });
     console.log("Code pushed to GitHub successfully on master branch.");
 
     // Step 6: Use Netlify API to create and link the site
