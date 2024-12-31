@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
     // console.log("GitHub repository created:", githubRepoUrl);
 
     // Step 5: Set remote to HTTPS and push code to GitHub
-    const githubRepoUrl = `https://github.com/${process.env.GITHUB_USER}/${projectName}.git`;
+    const githubRepoUrl = `https://github.com/${GITHUB_USERNAME}/${projectName}.git`;
     console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
 
     // Add the remote
