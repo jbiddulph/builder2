@@ -53,6 +53,8 @@ export default defineEventHandler(async (event) => {
     // Step 5: Set remote to HTTPS and push code to GitHub
     // execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
     execSync(`git remote add origin git@github.com:${GITHUB_USERNAME}/${projectName}.git`, { cwd: projectDir });
+    const sshRepoUrl = `git@github.com:${GITHUB_USERNAME}/${projectName}.git`;
+    execSync("ssh-agent bash -c 'ssh-add <(echo $GITHUB_PRIVATE_KEY); git remote add origin " + sshRepoUrl + "'", { cwd: projectDir });
     execSync("git push -u origin master", { cwd: projectDir });
     console.log("Code pushed to GitHub successfully on master branch.");
 
