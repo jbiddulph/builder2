@@ -31,8 +31,34 @@ export default defineEventHandler(async (event) => {
     }
     // Step 3: Initialize Git repository
     console.log("Initializing Git repository...");
-    execSync(`git config --global user.email ` + `"${process.env.GITHUB_EMAIL}"`);
-    execSync(`git config --global user.name ` + `"${process.env.GITHUB_USER}"`);
+    try {
+        const currentEmail = execSync('git config --global user.email').toString().trim();
+        const currentName = execSync('git config --global user.name').toString().trim();
+    
+        // Check and update user.email
+        if (currentEmail !== process.env.GITHUB_EMAIL) {
+            console.log(`Updating git user.email from '${currentEmail}' to '${process.env.GITHUB_EMAIL}'`);
+            execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
+        } else {
+            console.log('git user.email is already correct.');
+        }
+    
+        // Check and update user.name
+        if (currentName !== process.env.GITHUB_USER) {
+            console.log(`Updating git user.name from '${currentName}' to '${process.env.GITHUB_USER}'`);
+            execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
+        } else {
+            console.log('git user.name is already correct.');
+        }
+    } catch (error) {
+        console.error('Error while configuring git:', error.message);
+        // Optionally handle errors like missing configuration gracefully
+        if (error.message.includes('not found')) {
+            console.log('git config not set, setting now...');
+            execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
+            execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
+        }
+    }
     execSync("git init", { cwd: projectDir });
     execSync("git checkout -b master", { cwd: projectDir });
     execSync("git add .", { cwd: projectDir });
