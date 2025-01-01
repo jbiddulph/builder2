@@ -30,62 +30,50 @@ export default defineEventHandler(async (event) => {
       console.log("Modules added successfully.");
     }
 
-  // Step 1: Create a new Nuxt app
-  console.log("Creating a new Nuxt application...");
-  execSync(`npx nuxi@latest init ${projectDir}`);
-  console.log("Nuxt application created successfully.");
+    // Step 3: Initialize Git repository
+    console.log("Initializing Git repository...");
+    execSync(`git config --global user.email ${process.env.GITHUB_EMAIL}`, { cwd: projectDir });
+    execSync(`git config --global user.name ${process.env.GITHUB_NAME}`, { cwd: projectDir });
+    execSync("git init", { cwd: projectDir });
+    execSync("git checkout -b master", { cwd: projectDir });
+    execSync("git add .", { cwd: projectDir });
+    execSync(`git commit -m "Initial commit with selected modules"`, { cwd: projectDir });
+    execSync(`git branch -M main`, { cwd: projectDir });
+    console.log("Git repository initialized and initial commit made.");
 
-  // Step 2: Add selected modules
-  if (modules && modules.length) {
-    for (const module of modules) {
-      console.log(`Adding module: ${module}`);
-      execSync(`npx nuxi@latest module add ${module}`, { cwd: projectDir });
+    // Step 4: Create GitHub repo and get HTTPS URL
+    console.log("Creating GitHub repository...");
+    const repoResponse = await axios.post(
+      `https://api.github.com/user/repos`,
+      { name: projectName, private: true },
+      { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
+    );
+
+    // const githubRepoUrl = repoResponse.data.clone_url;
+    // console.log("GitHub repository created:", githubRepoUrl);
+
+    // Step 5: Set remote to HTTPS and push code to GitHub
+    const githubRepoUrl = `https://github.com/${process.env.GITHUB_USER}/${projectName}.git`;
+    const sshGitHubRepoUrl = `git@github.com:${process.env.GITHUB_USER}/${projectName}.git`;
+    console.log("Using GitHub URL:", githubRepoUrl);  // Check the URL
+    try {
+        // Add the remote
+        execSync(`git remote add origin ${sshGitHubRepoUrl}`, { cwd: projectDir });
+    
+        // Push the code
+        execSync("git push -u origin main", { cwd: projectDir });
+    } catch (error) {
+        console.error("Error setting remote or pushing code:", error.message);
     }
-    console.log("Modules added successfully.");
-  }
+    // Add the remote
+    //execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
 
-  // Step 3: Initialize Git repository
-  console.log("Initializing Git repository...");
-  try {
-    const currentEmail = execSync('git config --global user.email || echo ""').toString().trim();
-    const currentName = execSync('git config --global user.name || echo ""').toString().trim();
 
-    if (currentEmail !== process.env.GITHUB_EMAIL) {
-      console.log(`Updating git user.email to '${process.env.GITHUB_EMAIL}'`);
-      execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
-    }
-    if (currentName !== process.env.GITHUB_USER) {
-      console.log(`Updating git user.name to '${process.env.GITHUB_USER}'`);
-      execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
-    }
-  } catch (gitConfigError) {
-    console.error('Error while configuring git:', gitConfigError.message);
-  }
+    // Push the code
+    //execSync("git push -u origin master", { cwd: projectDir });
+    console.log("Code pushed to GitHub successfully on master branch.");
 
-  execSync("git init", { cwd: projectDir });
-  execSync("git checkout -b main", { cwd: projectDir }); // Use 'main' directly
-  execSync("git add .", { cwd: projectDir });
-  execSync('git commit -m "Initial commit with selected modules"', { cwd: projectDir });
-
-  // Step 4: Create GitHub repo
-  console.log("Creating GitHub repository...");
-  const repoResponse = await axios.post(
-    "https://api.github.com/user/repos",
-    { name: projectName, private: true },
-    { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
-  );
-  const githubRepoUrl = repoResponse.data.clone_url;
-  console.log("GitHub repository created:", githubRepoUrl);
-
-  execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
-  console.log("Pushing code to GitHub...");
-  execSync(
-    `git push -u https://${process.env.GITHUB_USER}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_USER}/${projectName} main`,
-    { cwd: projectDir }
-  );
-  console.log("Code pushed to GitHub successfully on main branch.");
-
-    // Step 5: Use Netlify API to create and link the site
+    // Step 6: Use Netlify API to create and link the site
     console.log("Linking GitHub repository to Netlify...");
     const netlifyResponse = await axios.post(
       "https://api.netlify.com/api/v1/sites",
@@ -109,7 +97,7 @@ export default defineEventHandler(async (event) => {
     const siteId = netlifyResponse.data.id;
     console.log("Netlify site ID:", siteId);
 
-    // Step 6: Create a deploy hook for the Netlify site
+    // Step 7: Create a deploy hook for the Netlify site
     console.log("Creating deploy hook for Netlify site...");
     const deployHookURL = await createDeployHook(siteId);
 
