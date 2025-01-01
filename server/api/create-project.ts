@@ -32,8 +32,22 @@ export default defineEventHandler(async (event) => {
     // Step 3: Initialize Git repository
     console.log("Initializing Git repository...");
     try {
-        const currentEmail = execSync('git config --global user.email').toString().trim();
-        const currentName = execSync('git config --global user.name').toString().trim();
+      let currentEmail = '';
+      let currentName = '';
+  
+      try {
+          // Attempt to get the current global email
+          currentEmail = execSync('git config --global user.email').toString().trim();
+      } catch {
+          console.log('No global user.email set.');
+      }
+  
+      try {
+            // Attempt to get the current global name
+            currentName = execSync('git config --global user.name').toString().trim();
+        } catch {
+            console.log('No global user.name set.');
+        }
     
         // Check and update user.email
         if (currentEmail !== process.env.GITHUB_EMAIL) {
@@ -52,12 +66,6 @@ export default defineEventHandler(async (event) => {
         }
     } catch (error) {
         console.error('Error while configuring git:', error.message);
-        // Optionally handle errors like missing configuration gracefully
-        if (error.message.includes('not found')) {
-            console.log('git config not set, setting now...');
-            execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
-            execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
-        }
     }
     execSync("git init", { cwd: projectDir });
     execSync("git checkout -b master", { cwd: projectDir });
