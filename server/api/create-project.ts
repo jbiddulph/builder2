@@ -86,7 +86,7 @@ export default defineEventHandler(async (event) => {
     console.log("GitHub repository created:", githubRepoUrl);
 
     // Step 5: Set remote to HTTPS and push code to GitHub
-    execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+    execSync(`git remote set-url origin git@github.com:${process.env.GITHUB_USER}/${projectName}`, { cwd: projectDir });
     execSync("git push -u origin main", { cwd: projectDir });
     console.log("Code pushed to GitHub successfully on master branch.");
 
