@@ -29,9 +29,6 @@ export default defineEventHandler(async (event) => {
       }
       console.log("Modules added successfully.");
     }
-    // Check for Git availability
-  const gitVersion = execSync('git --version').toString();
-  console.log('Git is available:', gitVersion);
 
   // Step 1: Create a new Nuxt app
   console.log("Creating a new Nuxt application...");
