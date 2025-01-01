@@ -73,8 +73,7 @@ export default defineEventHandler(async (event) => {
     execSync(`git commit -m "Initial commit with selected modules"`, { cwd: projectDir });
     execSync(`git branch -M main`, { cwd: projectDir });
     console.log("Git repository initialized and initial commit made.");
-    execSync(`git config --global credential.helper store`);
-    execSync(`echo "https://${process.env.GITHUB_USER}:${process.env.GITHUB_TOKEN}@github.com" > ~/.git-credentials`);
+
     // Step 4: Create GitHub repo and get HTTPS URL
     console.log("Creating GitHub repository...");
     const repoResponse = await axios.post(
@@ -85,10 +84,12 @@ export default defineEventHandler(async (event) => {
 
     const githubRepoUrl = repoResponse.data.clone_url;
     console.log("GitHub repository created:", githubRepoUrl);
-    
+    execSync('ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts');
+
     // Step 5: Set remote to HTTPS and push code to GitHub
-    execSync(`git remote add origin git@github.com:${process.env.GITHUB_USER}/${projectName}`, { cwd: projectDir });
-    execSync("git push -u origin main", { cwd: projectDir });
+    execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+    execSync(`git push -u https://${process.env.GITHUB_USER}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_USER}/${projectName} main`, { cwd: projectDir });
+
     console.log("Code pushed to GitHub successfully on master branch.");
 
     // Step 6: Use Netlify API to create and link the site
