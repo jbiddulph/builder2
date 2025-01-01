@@ -29,80 +29,66 @@ export default defineEventHandler(async (event) => {
       }
       console.log("Modules added successfully.");
     }
-    // Step 3: Initialize Git repository
-    console.log("Initializing Git repository...");
-    try {
-      let currentEmail = '';
-      let currentName = '';
-  
-      try {
-          // Attempt to get the current global email
-          currentEmail = execSync('git config --global user.email').toString().trim();
-      } catch {
-          console.log('No global user.email set.');
-      }
-  
-      try {
-            // Attempt to get the current global name
-            currentName = execSync('git config --global user.name').toString().trim();
-        } catch {
-            console.log('No global user.name set.');
-        }
-    
-        // Check and update user.email
-        if (currentEmail !== process.env.GITHUB_EMAIL) {
-            console.log(`Updating git user.email from '${currentEmail}' to '${process.env.GITHUB_EMAIL}'`);
-            execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
-        } else {
-            console.log('git user.email is already correct.');
-        }
-    
-        // Check and update user.name
-        if (currentName !== process.env.GITHUB_USER) {
-            console.log(`Updating git user.name from '${currentName}' to '${process.env.GITHUB_USER}'`);
-            execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
-        } else {
-            console.log('git user.name is already correct.');
-        }
-    } catch (error) {
-        console.error('Error while configuring git:', error.message);
+    // Check for Git availability
+  const gitVersion = execSync('git --version').toString();
+  console.log('Git is available:', gitVersion);
+
+  // Step 1: Create a new Nuxt app
+  console.log("Creating a new Nuxt application...");
+  execSync(`npx nuxi@latest init ${projectDir}`);
+  console.log("Nuxt application created successfully.");
+
+  // Step 2: Add selected modules
+  if (modules && modules.length) {
+    for (const module of modules) {
+      console.log(`Adding module: ${module}`);
+      execSync(`npx nuxi@latest module add ${module}`, { cwd: projectDir });
     }
-    execSync("git init", { cwd: projectDir });
-    execSync("git checkout -b master", { cwd: projectDir });
-    execSync("git add .", { cwd: projectDir });
-    execSync(`git commit -m "Initial commit with selected modules"`, { cwd: projectDir });
-    execSync(`git branch -M main`, { cwd: projectDir });
-    console.log("Git repository initialized and initial commit made.");
+    console.log("Modules added successfully.");
+  }
 
-    // Step 4: Create GitHub repo and get HTTPS URL
-    console.log("Creating GitHub repository...");
-    const repoResponse = await axios.post(
-      `https://api.github.com/user/repos`,
-      { name: projectName, private: true },
-      { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
-    );
+  // Step 3: Initialize Git repository
+  console.log("Initializing Git repository...");
+  try {
+    const currentEmail = execSync('git config --global user.email || echo ""').toString().trim();
+    const currentName = execSync('git config --global user.name || echo ""').toString().trim();
 
-    const githubRepoUrl = repoResponse.data.clone_url;
-    console.log("GitHub repository created:", githubRepoUrl);
+    if (currentEmail !== process.env.GITHUB_EMAIL) {
+      console.log(`Updating git user.email to '${process.env.GITHUB_EMAIL}'`);
+      execSync(`git config --global user.email "${process.env.GITHUB_EMAIL}"`);
+    }
+    if (currentName !== process.env.GITHUB_USER) {
+      console.log(`Updating git user.name to '${process.env.GITHUB_USER}'`);
+      execSync(`git config --global user.name "${process.env.GITHUB_USER}"`);
+    }
+  } catch (gitConfigError) {
+    console.error('Error while configuring git:', gitConfigError.message);
+  }
 
-    console.log("Initializing Git repository...");
-    execSync("git init", { cwd: projectDir });
-    execSync("git checkout -b master", { cwd: projectDir });
-    execSync("git add .", { cwd: projectDir });
-    execSync(`git commit -m "Initial commit with selected modules"`, { cwd: projectDir });
-    execSync(`git branch -M main`, { cwd: projectDir });
+  execSync("git init", { cwd: projectDir });
+  execSync("git checkout -b main", { cwd: projectDir }); // Use 'main' directly
+  execSync("git add .", { cwd: projectDir });
+  execSync('git commit -m "Initial commit with selected modules"', { cwd: projectDir });
 
-    console.log("Setting remote repository...");
-    execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+  // Step 4: Create GitHub repo
+  console.log("Creating GitHub repository...");
+  const repoResponse = await axios.post(
+    "https://api.github.com/user/repos",
+    { name: projectName, private: true },
+    { headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } }
+  );
+  const githubRepoUrl = repoResponse.data.clone_url;
+  console.log("GitHub repository created:", githubRepoUrl);
 
-    console.log("Pushing code to GitHub...");
-    execSync(
-      `git push -u https://${process.env.GITHUB_USER}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_USER}/${projectName} main`,
-      { cwd: projectDir }
-    );
-    console.log("Code pushed to GitHub successfully on main branch.");
+  execSync(`git remote add origin ${githubRepoUrl}`, { cwd: projectDir });
+  console.log("Pushing code to GitHub...");
+  execSync(
+    `git push -u https://${process.env.GITHUB_USER}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_USER}/${projectName} main`,
+    { cwd: projectDir }
+  );
+  console.log("Code pushed to GitHub successfully on main branch.");
 
-    // Step 6: Use Netlify API to create and link the site
+    // Step 5: Use Netlify API to create and link the site
     console.log("Linking GitHub repository to Netlify...");
     const netlifyResponse = await axios.post(
       "https://api.netlify.com/api/v1/sites",
@@ -126,7 +112,7 @@ export default defineEventHandler(async (event) => {
     const siteId = netlifyResponse.data.id;
     console.log("Netlify site ID:", siteId);
 
-    // Step 7: Create a deploy hook for the Netlify site
+    // Step 6: Create a deploy hook for the Netlify site
     console.log("Creating deploy hook for Netlify site...");
     const deployHookURL = await createDeployHook(siteId);
 
